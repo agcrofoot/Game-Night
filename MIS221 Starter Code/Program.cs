@@ -85,41 +85,54 @@ namespace MIS221_Starter_Code
         //Direct to game based on user selection
         public static void GameSelection(int gameChoice, ref int gilAmount)
         {
-            if (gameChoice == 1)
+            if (gilAmount >= 300)
             {
-                YouHaveChosen("Card Shark");
-                CSRules();
-                ClearScreen("continue");
-                DisplayGil(ref gilAmount);
-                int gilWager = GetWager();
-                int roundsWon = 0;
-                int timesPlayed = 0;
-                PlayCardShark(ref gilAmount, gilWager, ref roundsWon, ref timesPlayed);
+                Console.WriteLine("Congrats!! You won!!!");
+                Console.ReadKey();
+                System.Environment.Exit(1);
             }
-            else if (gameChoice == 2)
+            else if (gilAmount <= 0)
             {
-                YouHaveChosen("Shut the Box");
-                STBRules();
-                ClearScreen("continue");
-                DisplayGil(ref gilAmount);
-                int gilWager = GetWager();
-                int[] tileBox = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
-                int tilesLeft = 12;
-                int roundsWon = 0;
-                int timesPlayed = 0;
-                PlayShutTheBox(ref gilAmount, ref tilesLeft, tileBox, gilWager, ref roundsWon, ref timesPlayed);
+                Console.WriteLine("Oh no!! You ran out of gil, better luck next time.");
+                Console.ReadKey();
+                System.Environment.Exit(1);
             }
-            else if (gameChoice == 3)
+            else
             {
-                YouHaveChosen("Wheel of Fortune");
-                WOFRules();
-                ClearScreen("continue");
-                DisplayGil(ref gilAmount);
-                int gilWager = GetWager();
-                int roundsWon = 0;
-                int timesPlayed = 0;
-                PlayWheelOfFortune(ref gilAmount, gilWager, ref roundsWon, ref timesPlayed);
-            } 
+                if (gameChoice == 1)
+                {
+                    YouHaveChosen("Card Shark");
+                    CSRules();
+                    ClearScreen("continue");
+                    DisplayGil(ref gilAmount);
+                    int gilWager = GetWager();
+                    int roundsWon = 0;
+                    int timesPlayed = 0;
+                    PlayCardShark(ref gilAmount, gilWager, ref roundsWon, ref timesPlayed);
+                }
+                else if (gameChoice == 2)
+                {
+                    YouHaveChosen("Shut the Box");
+                    STBRules();
+                    ClearScreen("continue");
+                    DisplayGil(ref gilAmount);
+                    int gilWager = GetWager();
+                    int[] tileBox = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+                    int tilesLeft = 12;
+                    PlayShutTheBox(ref gilAmount, ref tilesLeft, tileBox, gilWager);
+                }
+                else if (gameChoice == 3)
+                {
+                    YouHaveChosen("Wheel of Fortune");
+                    WOFRules();
+                    ClearScreen("continue");
+                    DisplayGil(ref gilAmount);
+                    int gilWager = GetWager();
+                    int roundsWon = 0;
+                    int timesPlayed = 0;
+                    PlayWheelOfFortune(ref gilAmount, gilWager, ref roundsWon, ref timesPlayed);
+                }
+            }
         }
 
 
@@ -143,13 +156,13 @@ namespace MIS221_Starter_Code
 
 
         //Play Shut the Box
-        public static void PlayShutTheBox(ref int gilAmount, ref int tilesLeft, int[] tileBox, int gilWager, ref int roundsWon, ref int timesPlayed)
+        public static void PlayShutTheBox(ref int gilAmount, ref int tilesLeft, int[] tileBox, int gilWager)
         {
             Console.Clear();
             Random num = new Random();
             int dieOne = RollDie(num);
             int dieTwo = RollDie(num);
-            TurnOver(dieOne, dieTwo, tilesLeft, ref gilAmount, gilWager, ref roundsWon, ref timesPlayed, tileBox);
+            TurnOver(dieOne, dieTwo, tilesLeft, ref gilAmount, gilWager, tileBox);
         }
 
 
@@ -161,17 +174,18 @@ namespace MIS221_Starter_Code
             string word = GetWord(category);
             char[] displayWord = WordSpaces(word);
             int wrong = 0;
+            string lettersGuessed = "None";
 
             while(KeepGuessing(displayWord, wrong))
             {
                 Console.WriteLine("The category is " + category + "!");
-                ShowSpaces(displayWord, wrong);
+                ShowSpaces(displayWord, wrong, lettersGuessed);
                 int wheelValue = SpinWheel();
                 Console.WriteLine("You spun " + wheelValue + ".");
                 Console.WriteLine();
                 Console.WriteLine("Enter your guess.");
                 char guess = Console.ReadLine().ToUpper()[0];
-                CheckGuess(displayWord, word, ref wrong, guess, ref wheelValue, ref gilWager);
+                CheckGuess(displayWord, word, ref wrong, guess, ref wheelValue, ref gilWager, ref lettersGuessed);
             }
             
             
@@ -409,8 +423,8 @@ namespace MIS221_Starter_Code
         //Compares the value of the card drawn to the user guess
         public static void CompareCards(int cardGuess, int numValue, int newNumValue, ref int roundsWon, int gilWager, ref int gilAmount, ref int timesPlayed)
         {
-            Console.WriteLine("The first card's value was " + numValue + ".");
-            Console.WriteLine("The second card's value was " + newNumValue + ".");
+           Console.WriteLine("The first card's value was " + numValue + ".");
+           Console.WriteLine("The second card's value was " + newNumValue + ".");
            if(newNumValue < numValue)
            {
                 if(cardGuess == 1)
@@ -513,9 +527,8 @@ namespace MIS221_Starter_Code
 
 
         //User decides what tiles to turn
-        public static void TurnOver(int dieOne, int dieTwo, int tilesLeft, ref int gilAmount, int gilWager, ref int roundsWon, ref int timesPlayed, int[] tileBox)
+        public static void TurnOver(int dieOne, int dieTwo, int tilesLeft, ref int gilAmount, int gilWager, int[] tileBox)
         {
-            Console.Clear();
             Console.WriteLine("You rolled a " + dieOne + " and a " + dieTwo + ".");
             Console.WriteLine("Enter '1' to flip the tile that corresponds to the sum of the dice.");
             Console.WriteLine("Enter '2' to flip the tile that corresponds to Die One.");
@@ -526,19 +539,19 @@ namespace MIS221_Starter_Code
             if (userChoice == 1)
             {
                 int tileValue = dieOne + dieTwo;
-                FlipTiles(dieOne, dieTwo, tileValue, tilesLeft, ref gilAmount, gilWager, ref roundsWon, ref timesPlayed, tileBox);
+                FlipTiles(dieOne, dieTwo, tileValue, tilesLeft, ref gilAmount, gilWager, tileBox);
 
             }
             else if (userChoice == 2)
             {
                 int tileValue = dieOne;
-                FlipTiles(dieOne, dieTwo, tileValue, tilesLeft, ref gilAmount, gilWager, ref roundsWon, ref timesPlayed, tileBox);
+                FlipTiles(dieOne, dieTwo, tileValue, tilesLeft, ref gilAmount, gilWager, tileBox);
 
             }
             else if (userChoice == 3)
             {
                 int tileValue = dieTwo;
-                FlipTiles(dieOne, dieTwo, tileValue, tilesLeft, ref gilAmount, gilWager, ref roundsWon, ref timesPlayed, tileBox);
+                FlipTiles(dieOne, dieTwo, tileValue, tilesLeft, ref gilAmount, gilWager, tileBox);
             }
             else
             {
@@ -546,43 +559,41 @@ namespace MIS221_Starter_Code
                 int tileValueTwo = dieTwo;
                 if (tileValueOne == tileValueTwo)
                 {
-                    FlipTiles(dieOne, dieTwo, tileValueOne, tilesLeft, ref gilAmount, gilWager, ref roundsWon, ref timesPlayed, tileBox);
+                    FlipTiles(dieOne, dieTwo, tileValueOne, tilesLeft, ref gilAmount, gilWager, tileBox);
                 }
                 else
                 {
-                    FlipBothTiles(dieOne, dieTwo, tileValueOne, tileValueTwo, tilesLeft, ref gilAmount, gilWager, ref roundsWon, ref timesPlayed, tileBox);
+                    FlipBothTiles(dieOne, dieTwo, tileValueOne, tileValueTwo, tilesLeft, ref gilAmount, gilWager, tileBox);
                 }
             }
         }
 
         //Flips over Tile
         public static void FlipTiles(int dieOne, int dieTwo, int tileValue, int tilesLeft, ref int gilAmount, 
-            int gilWager, ref int roundsWon, ref int timesPlayed, int[] tileBox )
+            int gilWager, int[] tileBox)
         {
-            Boolean open = true;
+            Boolean closed = true;
             for (int i = 0; i < 12; i++)
             {
                 if (tileBox[i] == tileValue)
                 {
                     tileBox[i] = -1;
-                    open = false;
+                    closed = false;
                 }
             }
-            if (open)
+            if (closed)
             {
-                Console.WriteLine(tileValue + " is already flipped. If there are no more options, enter '1'.");
-                Console.WriteLine("Otherwise, enter '2'.");
-                int choice = int.Parse(Console.ReadLine());
-                choice = CardCheck(choice);
+                int choice = TileAlreadyFlipped(tileValue);
                 if(choice == 1)
                 {
                     Console.Clear();
                     EndGame(tilesLeft, ref gilAmount, gilWager);
-                    MainMenu(ref gilAmount);
+                    int gameChoice = MainMenu(ref gilAmount);
+                    GameSelection(gameChoice, ref gilAmount);
                 }
                 else
                 {
-                    TurnOver(dieOne, dieTwo, tilesLeft, ref gilAmount, gilWager, ref roundsWon, ref timesPlayed, tileBox);
+                    TurnOver(dieOne, dieTwo, tilesLeft, ref gilAmount, gilWager, tileBox);
                 }
             }
             else
@@ -591,7 +602,7 @@ namespace MIS221_Starter_Code
                 tilesLeft--;
                 Console.WriteLine("There are " + tilesLeft + " tiles left.");
                 Console.ReadKey();
-                PlayShutTheBox(ref gilAmount, ref tilesLeft, tileBox, gilWager, ref roundsWon, ref timesPlayed);
+                PlayShutTheBox(ref gilAmount, ref tilesLeft, tileBox, gilWager);
             }
             
         }
@@ -599,33 +610,31 @@ namespace MIS221_Starter_Code
 
         //Determines if two tiles can be flipped
         public static void FlipBothTiles(int dieOne, int dieTwo, int tileValueOne, int tileValueTwo, int tilesLeft, ref int gilAmount,
-            int gilWager, ref int roundsWon, ref int timesPlayed, int[] tileBox)
+            int gilWager, int[] tileBox)
         {
-            Boolean open = true;
+            Boolean closed = true;
             for (int i = 0; i < 12; i++)
             {
                 if (tileBox[i] == tileValueOne)
                 {
                     tileBox[i] = -1;
-                    open = false;
+                    closed = false;
                 }
             }
 
-            if(open)
+            if(closed)
             {
-                Console.WriteLine(tileValueOne + " is already flipped. If there are no more options, enter '1'.");
-                Console.WriteLine("Otherwise, enter '2'.");
-                int choice = int.Parse(Console.ReadLine());
-                choice = CardCheck(choice);
+                int choice = TileAlreadyFlipped(tileValueOne);
                 if (choice == 1)
                 {
                     Console.Clear();
                     EndGame(tilesLeft, ref gilAmount, gilWager);
-                    MainMenu(ref gilAmount);
+                    int gameChoice = MainMenu(ref gilAmount);
+                    GameSelection(gameChoice, ref gilAmount);
                 }
                 else
                 {
-                    TurnOver(dieOne, dieTwo, tilesLeft, ref gilAmount, gilWager, ref roundsWon, ref timesPlayed, tileBox);
+                    TurnOver(dieOne, dieTwo, tilesLeft, ref gilAmount, gilWager, tileBox);
                 }
 
             }
@@ -642,24 +651,22 @@ namespace MIS221_Starter_Code
                 if (tileBox[i] == tileValueTwo)
                 {
                     tileBox[i] = -1;
-                    open = false;
+                    closed = false;
                 }
             }
-            if (open)
+            if (closed)
             {
-                Console.WriteLine(tileValueTwo + " is already flipped. If there are no more options, enter '1'.");
-                Console.WriteLine("Otherwise, enter '2'.");
-                int choice = int.Parse(Console.ReadLine());
-                choice = CardCheck(choice);
+                int choice = TileAlreadyFlipped(tileValueTwo);
                 if (choice == 1)
                 {
                     Console.Clear();
                     EndGame(tilesLeft, ref gilAmount, gilWager);
-                    MainMenu(ref gilAmount);
+                    int gameChoice = MainMenu(ref gilAmount);
+                    GameSelection(gameChoice, ref gilAmount);
                 }
                 else
                 {
-                    TurnOver(dieOne, dieTwo, tilesLeft, ref gilAmount, gilWager, ref roundsWon, ref timesPlayed, tileBox);
+                    TurnOver(dieOne, dieTwo, tilesLeft, ref gilAmount, gilWager, tileBox);
                 }
             }
             else
@@ -668,9 +675,20 @@ namespace MIS221_Starter_Code
                 tilesLeft --;
                 Console.WriteLine("There are " + tilesLeft + " tiles left.");
                 Console.ReadKey();
-                PlayShutTheBox(ref gilAmount, ref tilesLeft, tileBox, gilWager, ref roundsWon, ref timesPlayed);
+                PlayShutTheBox(ref gilAmount, ref tilesLeft, tileBox, gilWager);
             }
            
+        }
+
+
+        //Lets user know the tile was already flipped
+        public static int TileAlreadyFlipped(int tileValue)
+        {
+            Console.WriteLine(tileValue + " is already flipped. If there are no more options, enter '1'.");
+            Console.WriteLine("Otherwise, enter '2'.");
+            int choice = int.Parse(Console.ReadLine());
+            choice = CardCheck(choice);
+            return choice;
         }
 
 
@@ -697,6 +715,7 @@ namespace MIS221_Starter_Code
 
         }
 
+        //Checks if input is valid
         public static int InputCheck(int choice)
         {
             if (choice < 1 || choice > 4)
@@ -866,7 +885,7 @@ namespace MIS221_Starter_Code
 
 
         //Displays the word spaces
-        public static void ShowSpaces(char[] displayWord, int wrong)
+        public static void ShowSpaces(char[] displayWord, int wrong, string lettersGuessed)
         {
             for(int i = 0; i < displayWord.Length; i++)
             {
@@ -874,12 +893,14 @@ namespace MIS221_Starter_Code
             }
 
             Console.WriteLine();
+            Console.WriteLine("Letters Guessed: " + lettersGuessed);
             Console.WriteLine("You have missed " + wrong);
         }
 
 
         //Checks user guess
-        public static void CheckGuess(char[] displayWord, string word, ref int wrong, char guess, ref int wheelValue, ref int gilWager)
+        public static void CheckGuess(char[] displayWord, string word, ref int wrong, char guess,
+            ref int wheelValue, ref int gilWager, ref string lettersGuessed)
         {
             Boolean incorrect = true;
             for(int i = 0; i < word.Length; i++)
@@ -892,18 +913,36 @@ namespace MIS221_Starter_Code
             }
             if(incorrect)
             {
-                Console.WriteLine("There are no " + guess + "s.");
+                Console.WriteLine("There are no " + guess + "s. Press 'enter' to continue.");
+                Console.ReadKey();
                 Console.Clear();
                 wrong++;
                 gilWager -= wheelValue;
                 Console.WriteLine("You have " + gilWager + ".");
+                if(lettersGuessed == "None")
+                {
+                    lettersGuessed = "" + guess;
+                }
+                else
+                {
+                    lettersGuessed += guess;
+                }
             }
             else
             {
-                Console.WriteLine("Yes, there are " + guess + "s.");
+                Console.WriteLine("Yes, there are " + guess + "s. Press 'enter' to continue.");
+                Console.ReadKey();
                 Console.Clear();
                 gilWager += wheelValue;
                 Console.WriteLine("You have " + gilWager + ".");
+                if (lettersGuessed == "None")
+                {
+                    lettersGuessed = "" + guess;
+                }
+                else
+                {
+                    lettersGuessed += guess;
+                }
             }
         }
 
